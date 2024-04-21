@@ -261,3 +261,43 @@ class Livechart:
 
         return self.graphql(operationName, variables, query)
     
+
+    def GetStudio(self, id):
+        """
+        Retrieve information about a studio based on the provided ID.
+
+        Args:
+            id (str): The ID of the studio.
+        """
+
+        operationName = "GetStudio"
+        variables = {"id": id}
+        query = "query GetStudio($id: ID!) { studio(id: $id) { __typename ...studioFields } }  fragment favoritableFields on Favoritable { id favoriteCount viewerHasFavorited }  fragment twitterFragment on TwitterProfile { username url }  fragment dateWithPrecisionFields on DateWithPrecision { date: value datePrecision: precision }  fragment onTheFlyImageFields on OnTheFlyImage { urlTemplate cacheNamespace styles { name formats width height } }  fragment studioFields on Studio { __typename id databaseId name nativeName websiteUrl facebookUrl createdAt updatedAt ...favoritableFields twitterProfile { __typename ...twitterFragment } defunctDate { __typename ...dateWithPrecisionFields } foundedDate { __typename ...dateWithPrecisionFields } logo { __typename ...onTheFlyImageFields } }"
+        return self.graphql(operationName, variables, query)
+
+
+    def StudioAnime(self, id, beforeCursor, afterCursor, first, last, viewingPreferences, sort, titlePreference):
+        """
+        Retrieve information about anime produced by a studio based on the provided studio ID.
+
+        Args:
+            id (str): The ID of the studio.
+            beforeCursor (str, optional): A cursor that points to the item before the current page of results.
+            afterCursor (str, optional): A cursor that points to the item after the current page of results.
+            first (int, optional): Maximum number of items to retrieve from the previous page.
+            last (int, optional): Maximum number of items to retrieve from the next page.
+        """
+
+        operationName = "StudioAnime"
+        variables = {
+            "id": id,
+            "beforeCursor": beforeCursor,
+            "afterCursor": afterCursor,
+            "first": first,
+            "last": last,
+            "viewingPreferences": viewingPreferences,
+            "sort": sort,
+            "titlePreference": titlePreference
+        }
+        query = "query StudioAnime($id: ID!, $beforeCursor: String, $afterCursor: String, $first: Int, $last: Int, $viewingPreferences: ViewingPreferencesInput, $sort: AnimeSort, $titlePreference: TitleLanguage) { studio(id: $id) { anime(before: $beforeCursor, after: $afterCursor, first: $first, last: $last, sort: $sort, titlePreference: $titlePreference) { __typename ...animeConnectionFragment } } }  fragment dateTimeWithPrecisionFields on DateTimeWithPrecision { dateTime: value dateTimePrecision: precision }  fragment onTheFlyImageFields on OnTheFlyImage { urlTemplate cacheNamespace styles { name formats width height } }  fragment animeSnippetFields on Anime { id databaseId romajiTitle englishTitle nativeTitle alternativeTitles format formatLabel category sourceMaterialDatabaseId updatedAt createdAt releaseStatus premiereSeason { yearQuarter } startDate { __typename ...dateTimeWithPrecisionFields } aggregateRating { count weightedValue bestPossible worstPossible } episodeInfo { count duration } editorNote { markdown } poster { __typename ...onTheFlyImageFields } }  fragment episodeNumberRangeFields on EpisodeNumberRange { minNumber minReleaseNumber size label lastOfAnime lastOfSchedule }  fragment episodeRangeFields on EpisodeRange { numberRange { __typename ...episodeNumberRangeFields } date timeIsApproximate }  fragment releaseSeasonFragment on ReleaseSeason { title slug yearQuarter startDate endDate }  fragment dateWithPrecisionFields on DateWithPrecision { date: value datePrecision: precision }  fragment episodeRangePlaceholderFields on EpisodeRangePlaceholder { numberRange { __typename ...episodeNumberRangeFields } value { __typename ... on ApproximateReleaseMessage { body } ... on ReleaseSeason { __typename ...releaseSeasonFragment } ... on DateWithPrecision { __typename ...dateWithPrecisionFields } ... on DateTimeWithPrecision { __typename ...dateTimeWithPrecisionFields } } }  fragment releaseScheduleStateFields on ReleaseScheduleState { databaseId animeDatabaseId releaseScheduleDatabaseId schedulingNoteDatabaseId networkName networkShortName scheduleTitle scheduleShortTitle includeNetworkInShortTitle releaseStatus updatedAt previousRelease { __typename ...episodeRangeFields } nextRelease { __typename ...episodeRangeFields } nextReleasePlaceholder { __typename ...episodeRangePlaceholderFields } accentColorOnLight { hex } accentColorOnDark { hex } action { url labelText iconMaskUrl } }  fragment viewerLibraryEntryFields on ViewerLibraryEntry { animeDatabaseId episodesWatched rewatches status rating ratingScale notes startedAt finishedAt updatedAt createdAt }  fragment animeFragment on Anime { __typename ...animeSnippetFields releaseState(viewingPreferences: $viewingPreferences) { __typename ...releaseScheduleStateFields } viewerLibraryEntry { __typename ...viewerLibraryEntryFields } }  fragment pageInfoFragment on PageInfo { hasPreviousPage hasNextPage startCursor endCursor }  fragment animeConnectionFragment on AnimeConnection { nodes { __typename ...animeFragment } pageInfo { __typename ...pageInfoFragment } }"
+        return self.graphql(operationName, variables, query)
