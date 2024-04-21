@@ -175,12 +175,11 @@ class Livechart:
             "animeId": animeId,
             "preferredLanguages": preferredLanguages,
             "first": first,
-            "last": last
+            "last": last,
         }
         query = "query GetAnimeVisuals($animeId: ID!, $preferredLanguages: [String!], $beforeCursor: String, $afterCursor: String, $first: Int, $last: Int) { singleAnime(id: $animeId) { visuals(preferredLanguages: $preferredLanguages, before: $beforeCursor, after: $afterCursor, first: $first, last: $last) { nodes { __typename ...animeVisualFields } pageInfo { __typename ...pageInfoFragment } } } }  fragment onTheFlyImageFields on OnTheFlyImage { urlTemplate cacheNamespace styles { name formats width height } }  fragment animeVisualFields on AnimeVisual { databaseId animeDatabaseId position updatedAt createdAt label description { markdown } spoilerNote containsSpoilers copyrightNotice shortCopyrightNotice dimensions { aspectRatio orientation } image { __typename ...onTheFlyImageFields } }  fragment pageInfoFragment on PageInfo { hasPreviousPage hasNextPage startCursor endCursor }"
-        
-        return self.graphql(operationName, variables, query)
 
+        return self.graphql(operationName, variables, query)
 
     def GetHeadlines(self, first, last, relatedTo):
         """
@@ -193,11 +192,71 @@ class Livechart:
         """
 
         operationName = "GetHeadlines"
+        variables = {"first": first, "last": last, "relatedTo": relatedTo}
+        query = "query GetHeadlines($beforeCursor: String, $afterCursor: String, $first: Int, $last: Int, $relatedTo: ID) { headlines(before: $beforeCursor, after: $afterCursor, first: $first, last: $last, relatedTo: $relatedTo) { nodes { __typename ...headlineFields } pageInfo { __typename ...pageInfoFragment } } }  fragment onTheFlyImageFields on OnTheFlyImage { urlTemplate cacheNamespace styles { name formats width height } }  fragment headlineRelatablesCollectionMetaDataFields on HeadlineRelatablesCollection { totalCount }  fragment headlineFields on Headline { databaseId title subTitle sponsored targetUrl targetHost createdAt updatedAt edited thumbnail { __typename ...onTheFlyImageFields } relatedAnime { __typename ...headlineRelatablesCollectionMetaDataFields } relatedStudios { __typename ...headlineRelatablesCollectionMetaDataFields } }  fragment pageInfoFragment on PageInfo { hasPreviousPage hasNextPage startCursor endCursor }"
+
+        return self.graphql(operationName, variables, query)
+
+    def ChartPlacements(
+        self,
+        chartId,
+        sort,
+        category,
+        titlePreference,
+        markFilters,
+        ongoingFilter,
+        viewingPreferences,
+        first,
+        last,
+    ):
+        """
+        Retrieve chart placements based on the specified parameters.
+
+        Args:
+            chartId (str): The ID of the chart.
+            sort (dict): Sorting options. Should be a dictionary containing:
+                - 'algorithm' (str): The sorting algorithm (e.g., "POPULARITY").
+                - 'direction' (str): The sorting direction (e.g., "DESC" for descending).
+            category (str): The category of anime placements (TV, MOVIES, OVAS, or null for all categories).
+            titlePreference (str): The language preference for the titles of the anime.
+            markFilters (dict): Filters to apply to the release marks. Should be a dictionary containing:
+                - 'excludeStatuses' (list of str): Statuses to exclude from the timetable. Possible values: 'PAUSED', 'DROPPED', 'SKIPPING'.
+                - 'excludeUnmarked' (bool): Whether to exclude unmarked releases. True to exclude, False to include.
+            ongoingFilter (str): Filter for ongoing anime.
+            viewingPreferences (dict): Preferences for the viewer. Should be a dictionary containing:
+                - 'preferredLanguages' (list of str): Preferred languages for viewing. Leave empty for default.
+            first (int): The number of placements to retrieve from the beginning of the list.
+            last (int): The number of placements to retrieve from the end of the list.
+        """
+
+        operationName = "ChartPlacements"
         variables = {
+            "chartId": chartId,
+            "sort": sort,
+            "category": category,
+            "titlePreference": titlePreference,
+            "markFilters": markFilters,
+            "ongoingFilter": ongoingFilter,
+            "viewingPreferences": viewingPreferences,
             "first": first,
             "last": last,
-            "relatedTo": relatedTo
         }
-        query = "query GetHeadlines($beforeCursor: String, $afterCursor: String, $first: Int, $last: Int, $relatedTo: ID) { headlines(before: $beforeCursor, after: $afterCursor, first: $first, last: $last, relatedTo: $relatedTo) { nodes { __typename ...headlineFields } pageInfo { __typename ...pageInfoFragment } } }  fragment onTheFlyImageFields on OnTheFlyImage { urlTemplate cacheNamespace styles { name formats width height } }  fragment headlineRelatablesCollectionMetaDataFields on HeadlineRelatablesCollection { totalCount }  fragment headlineFields on Headline { databaseId title subTitle sponsored targetUrl targetHost createdAt updatedAt edited thumbnail { __typename ...onTheFlyImageFields } relatedAnime { __typename ...headlineRelatablesCollectionMetaDataFields } relatedStudios { __typename ...headlineRelatablesCollectionMetaDataFields } }  fragment pageInfoFragment on PageInfo { hasPreviousPage hasNextPage startCursor endCursor }"
-        
+        query = "query ChartPlacements($chartId: ID, $sort: AnimeChartPlacementSort!, $category: AnimeCategory, $titlePreference: TitleLanguage, $markFilters: MarkFiltersInput, $ongoingFilter: OngoingFilter, $beforeCursor: String, $afterCursor: String, $viewingPreferences: ViewingPreferencesInput, $first: Int, $last: Int) { chart(id: $chartId) { animePlacements(category: $category, sort: $sort, titlePreference: $titlePreference, markFilters: $markFilters, ongoingFilter: $ongoingFilter, before: $beforeCursor, after: $afterCursor, first: $first, last: $last) { nodes { __typename ...animeChartPlacementFields anime { __typename ...animeSnippetFields viewerLibraryEntry { __typename ...viewerLibraryEntryFields } releaseState(viewingPreferences: $viewingPreferences) { __typename ...releaseScheduleStateFields } } } pageInfo { __typename ...pageInfoFragment } } } }  fragment dateTimeWithPrecisionFields on DateTimeWithPrecision { dateTime: value dateTimePrecision: precision }  fragment animeChartPlacementFields on AnimeChartPlacement { databaseId chartDatabaseId animeDatabaseId yearQuarter editorNote leftover ongoingOffset date { __typename ...dateTimeWithPrecisionFields } updatedAt createdAt }  fragment onTheFlyImageFields on OnTheFlyImage { urlTemplate cacheNamespace styles { name formats width height } }  fragment animeSnippetFields on Anime { id databaseId romajiTitle englishTitle nativeTitle alternativeTitles format formatLabel category sourceMaterialDatabaseId updatedAt createdAt releaseStatus premiereSeason { yearQuarter } startDate { __typename ...dateTimeWithPrecisionFields } aggregateRating { count weightedValue bestPossible worstPossible } episodeInfo { count duration } editorNote { markdown } poster { __typename ...onTheFlyImageFields } }  fragment viewerLibraryEntryFields on ViewerLibraryEntry { animeDatabaseId episodesWatched rewatches status rating ratingScale notes startedAt finishedAt updatedAt createdAt }  fragment episodeNumberRangeFields on EpisodeNumberRange { minNumber minReleaseNumber size label lastOfAnime lastOfSchedule }  fragment episodeRangeFields on EpisodeRange { numberRange { __typename ...episodeNumberRangeFields } date timeIsApproximate }  fragment releaseSeasonFragment on ReleaseSeason { title slug yearQuarter startDate endDate }  fragment dateWithPrecisionFields on DateWithPrecision { date: value datePrecision: precision }  fragment episodeRangePlaceholderFields on EpisodeRangePlaceholder { numberRange { __typename ...episodeNumberRangeFields } value { __typename ... on ApproximateReleaseMessage { body } ... on ReleaseSeason { __typename ...releaseSeasonFragment } ... on DateWithPrecision { __typename ...dateWithPrecisionFields } ... on DateTimeWithPrecision { __typename ...dateTimeWithPrecisionFields } } }  fragment releaseScheduleStateFields on ReleaseScheduleState { databaseId animeDatabaseId releaseScheduleDatabaseId schedulingNoteDatabaseId networkName networkShortName scheduleTitle scheduleShortTitle includeNetworkInShortTitle releaseStatus updatedAt previousRelease { __typename ...episodeRangeFields } nextRelease { __typename ...episodeRangeFields } nextReleasePlaceholder { __typename ...episodeRangePlaceholderFields } accentColorOnLight { hex } accentColorOnDark { hex } action { url labelText iconMaskUrl } }  fragment pageInfoFragment on PageInfo { hasPreviousPage hasNextPage startCursor endCursor }"
+
+        return self.graphql(operationName, variables, query)
+
+    def GetChart(self, id, default, nearestOfSeason):
+        """
+        Retrieve chart details based on the specified parameters.
+
+        Args:
+            id (str, optional): The ID of the chart. Defaults to None.
+            default (str): Default chart mode. Possible values: "CURRENT", "NEAREST". Defaults to "CURRENT".
+            nearestOfSeason (str, optional): Season nearest to the specified one. Defaults to None.
+        """
+
+        operationName = "GetChart"
+        variables = {"id": id, "default": default, "nearestOfSeason": nearestOfSeason}
+        query = "query GetChart($id: ID, $default: DefaultChartMode, $nearestOfSeason: Season) { chart(id: $id, default: $default, nearestOfSeason: $nearestOfSeason) { __typename ...chartFields ...chartRelativeSeasonFields } }  fragment chartFields on Chart { databaseId season { yearQuarter slug } updatedAt createdAt }  fragment chartRelativeSeasonFields on DeepChart { previousSeason { yearQuarter } nextSeason { yearQuarter } }"
+
         return self.graphql(operationName, variables, query)
