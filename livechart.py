@@ -180,3 +180,24 @@ class Livechart:
         query = "query GetAnimeVisuals($animeId: ID!, $preferredLanguages: [String!], $beforeCursor: String, $afterCursor: String, $first: Int, $last: Int) { singleAnime(id: $animeId) { visuals(preferredLanguages: $preferredLanguages, before: $beforeCursor, after: $afterCursor, first: $first, last: $last) { nodes { __typename ...animeVisualFields } pageInfo { __typename ...pageInfoFragment } } } }  fragment onTheFlyImageFields on OnTheFlyImage { urlTemplate cacheNamespace styles { name formats width height } }  fragment animeVisualFields on AnimeVisual { databaseId animeDatabaseId position updatedAt createdAt label description { markdown } spoilerNote containsSpoilers copyrightNotice shortCopyrightNotice dimensions { aspectRatio orientation } image { __typename ...onTheFlyImageFields } }  fragment pageInfoFragment on PageInfo { hasPreviousPage hasNextPage startCursor endCursor }"
         
         return self.graphql(operationName, variables, query)
+
+
+    def GetHeadlines(self, first, last, relatedTo):
+        """
+        Retrieve headlines based on the specified parameters.
+
+        Args:
+            first (int): The number of headlines to retrieve from the beginning of the list.
+            last (int): The number of headlines to retrieve from the end of the list.
+            relatedTo (str): The ID of the related item.
+        """
+
+        operationName = "GetHeadlines"
+        variables = {
+            "first": first,
+            "last": last,
+            "relatedTo": relatedTo
+        }
+        query = "query GetHeadlines($beforeCursor: String, $afterCursor: String, $first: Int, $last: Int, $relatedTo: ID) { headlines(before: $beforeCursor, after: $afterCursor, first: $first, last: $last, relatedTo: $relatedTo) { nodes { __typename ...headlineFields } pageInfo { __typename ...pageInfoFragment } } }  fragment onTheFlyImageFields on OnTheFlyImage { urlTemplate cacheNamespace styles { name formats width height } }  fragment headlineRelatablesCollectionMetaDataFields on HeadlineRelatablesCollection { totalCount }  fragment headlineFields on Headline { databaseId title subTitle sponsored targetUrl targetHost createdAt updatedAt edited thumbnail { __typename ...onTheFlyImageFields } relatedAnime { __typename ...headlineRelatablesCollectionMetaDataFields } relatedStudios { __typename ...headlineRelatablesCollectionMetaDataFields } }  fragment pageInfoFragment on PageInfo { hasPreviousPage hasNextPage startCursor endCursor }"
+        
+        return self.graphql(operationName, variables, query)
