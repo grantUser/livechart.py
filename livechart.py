@@ -215,9 +215,9 @@ class Livechart:
         Args:
             chartId (str): The ID of the chart.
             sort (dict): Sorting options. Should be a dictionary containing:
-                - 'algorithm' (str): The sorting algorithm (e.g., "POPULARITY").
-                - 'direction' (str): The sorting direction (e.g., "DESC" for descending).
-            category (str): The category of anime placements (TV, MOVIES, OVAS, or null for all categories).
+                - 'algorithm' (str): The sorting algorithm (e.g., "POPULARITY", "NEXT_EPISODE_COUNTDOWN", "AVERAGE_RATING", "DATE", "ANIME_UPDATED_AT", "ANIME_TITLE").
+                - 'direction' (str): The sorting direction (e.g., "DESC" for descending, "ASC" for ascending).
+            category (str): The category of anime placements ("TV", "MOVIES", "OVAS", or null for all categories).
             titlePreference (str): The language preference for the titles of the anime.
             markFilters (dict): Filters to apply to the release marks. Should be a dictionary containing:
                 - 'excludeStatuses' (list of str): Statuses to exclude from the timetable. Possible values: 'PAUSED', 'DROPPED', 'SKIPPING'.
@@ -260,3 +260,4 @@ class Livechart:
         query = "query GetChart($id: ID, $default: DefaultChartMode, $nearestOfSeason: Season) { chart(id: $id, default: $default, nearestOfSeason: $nearestOfSeason) { __typename ...chartFields ...chartRelativeSeasonFields } }  fragment chartFields on Chart { databaseId season { yearQuarter slug } updatedAt createdAt }  fragment chartRelativeSeasonFields on DeepChart { previousSeason { yearQuarter } nextSeason { yearQuarter } }"
 
         return self.graphql(operationName, variables, query)
+    
