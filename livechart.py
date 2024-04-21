@@ -69,3 +69,49 @@ class Livechart:
         query = "query GetFullSingleAnime($id: ID!, $viewingPreferences: ViewingPreferencesInput) { singleAnime(id: $id) { __typename ...fullAnimeFragment } }  fragment dateTimeWithPrecisionFields on DateTimeWithPrecision { dateTime: value dateTimePrecision: precision }  fragment onTheFlyImageFields on OnTheFlyImage { urlTemplate cacheNamespace styles { name formats width height } }  fragment animeSnippetFields on Anime { id databaseId romajiTitle englishTitle nativeTitle alternativeTitles format formatLabel category sourceMaterialDatabaseId updatedAt createdAt releaseStatus premiereSeason { yearQuarter } startDate { __typename ...dateTimeWithPrecisionFields } aggregateRating { count weightedValue bestPossible worstPossible } episodeInfo { count duration } editorNote { markdown } poster { __typename ...onTheFlyImageFields } }  fragment twitterFragment on TwitterProfile { username url }  fragment animeDetailsFields on Anime { databaseId updatedAt createdAt hasStreams hasVideos websiteUrl malUrl anidbUrl anilistUrl kitsuUrl animePlanetUrl anisearchUrl annUrl franchiseMembership { defaultFranchiseDatabaseId franchiseCount } synopsis { markdown emended spoilerNote containsSpoilers source sourceUrl } twitterProfile { __typename ...twitterFragment } }  fragment episodeNumberRangeFields on EpisodeNumberRange { minNumber minReleaseNumber size label lastOfAnime lastOfSchedule }  fragment episodeRangeFields on EpisodeRange { numberRange { __typename ...episodeNumberRangeFields } date timeIsApproximate }  fragment releaseSeasonFragment on ReleaseSeason { title slug yearQuarter startDate endDate }  fragment dateWithPrecisionFields on DateWithPrecision { date: value datePrecision: precision }  fragment episodeRangePlaceholderFields on EpisodeRangePlaceholder { numberRange { __typename ...episodeNumberRangeFields } value { __typename ... on ApproximateReleaseMessage { body } ... on ReleaseSeason { __typename ...releaseSeasonFragment } ... on DateWithPrecision { __typename ...dateWithPrecisionFields } ... on DateTimeWithPrecision { __typename ...dateTimeWithPrecisionFields } } }  fragment releaseScheduleStateFields on ReleaseScheduleState { databaseId animeDatabaseId releaseScheduleDatabaseId schedulingNoteDatabaseId networkName networkShortName scheduleTitle scheduleShortTitle includeNetworkInShortTitle releaseStatus updatedAt previousRelease { __typename ...episodeRangeFields } nextRelease { __typename ...episodeRangeFields } nextReleasePlaceholder { __typename ...episodeRangePlaceholderFields } accentColorOnLight { hex } accentColorOnDark { hex } action { url labelText iconMaskUrl } }  fragment schedulingNoteFields on SchedulingNote { databaseId releaseScheduleDatabaseId createdAt updatedAt sentiment gist message { markdown } releaseDate timeIsApproximate animeDatabaseId action { url labelText } }  fragment viewerLibraryEntryFields on ViewerLibraryEntry { animeDatabaseId episodesWatched rewatches status rating ratingScale notes startedAt finishedAt updatedAt createdAt }  fragment sourceMaterialFields on SourceMaterial { databaseId name tagDatabaseId createdAt updatedAt }  fragment tagFields on Tag { databaseId name classification classificationLabel ageRestricted createdAt updatedAt }  fragment favoritableFields on Favoritable { id favoriteCount viewerHasFavorited }  fragment studioFields on Studio { __typename id databaseId name nativeName websiteUrl facebookUrl createdAt updatedAt ...favoritableFields twitterProfile { __typename ...twitterFragment } defunctDate { __typename ...dateWithPrecisionFields } foundedDate { __typename ...dateWithPrecisionFields } logo { __typename ...onTheFlyImageFields } }  fragment franchiseInstallmentFields on FranchiseInstallment { databaseId franchiseDatabaseId animeDatabaseId label description { markdown } updatedAt createdAt }  fragment franchiseFields on Franchise { databaseId slug englishName romajiName defaultOrderDatabaseId description { markdown } updatedAt createdAt }  fragment franchiseInstallmentAndFranchiseFragment on FranchiseInstallment { __typename ...franchiseInstallmentFields franchise { __typename ...franchiseFields } }  fragment fullAnimeFragment on Anime { __typename ...animeSnippetFields ...animeDetailsFields releaseState(viewingPreferences: $viewingPreferences) { __typename ...releaseScheduleStateFields schedulingNote { __typename ...schedulingNoteFields } } viewerLibraryEntry { __typename ...viewerLibraryEntryFields } sourceMaterial { __typename ...sourceMaterialFields } tags { __typename ...tagFields } studios { __typename ...studioFields } franchiseInstallments { __typename ...franchiseInstallmentAndFranchiseFragment } }"
 
         return self.graphql(operationName, variables, query)
+
+
+    def GetFranchiseInstallments(self, franchiseId, titlePreference, first, last):
+        """
+        Retrieve franchise installments based on the specified parameters.
+
+        Args:
+            franchiseId (str): The ID of the franchise.
+            titlePreference (str): The language preference for the titles of the installments. Possible values: 'ROMAJI', 'ENGLISH', 'NATIVE'.
+            first (int): The number of installments to retrieve from the beginning of the list.
+            last (int): The number of installments to retrieve from the end of the list.
+        """
+
+        operationName = "GetFranchiseInstallments"
+        variables = {
+            "franchiseId": franchiseId,
+            "titlePreference": titlePreference,
+            "first": first,
+            "last": last
+        }
+        query = "query GetFranchiseInstallments($franchiseId: ID!, $orderId: ID, $titlePreference: TitleLanguage, $beforeCursor: String, $afterCursor: String, $first: Int, $last: Int) { franchise(id: $franchiseId) { __typename ...franchiseFields installments(orderId: $orderId, titlePreference: $titlePreference, before: $beforeCursor, after: $afterCursor, first: $first, last: $last) { nodes { __typename ...franchiseInstallmentAndAnimeFragment } pageInfo { __typename ...pageInfoFragment } } } }  fragment franchiseFields on Franchise { databaseId slug englishName romajiName defaultOrderDatabaseId description { markdown } updatedAt createdAt }  fragment franchiseInstallmentFields on FranchiseInstallment { databaseId franchiseDatabaseId animeDatabaseId label description { markdown } updatedAt createdAt }  fragment dateTimeWithPrecisionFields on DateTimeWithPrecision { dateTime: value dateTimePrecision: precision }  fragment onTheFlyImageFields on OnTheFlyImage { urlTemplate cacheNamespace styles { name formats width height } }  fragment animeSnippetFields on Anime { id databaseId romajiTitle englishTitle nativeTitle alternativeTitles format formatLabel category sourceMaterialDatabaseId updatedAt createdAt releaseStatus premiereSeason { yearQuarter } startDate { __typename ...dateTimeWithPrecisionFields } aggregateRating { count weightedValue bestPossible worstPossible } episodeInfo { count duration } editorNote { markdown } poster { __typename ...onTheFlyImageFields } }  fragment viewerLibraryEntryFields on ViewerLibraryEntry { animeDatabaseId episodesWatched rewatches status rating ratingScale notes startedAt finishedAt updatedAt createdAt }  fragment franchiseInstallmentAndAnimeFragment on FranchiseInstallment { __typename ...franchiseInstallmentFields anime { __typename ...animeSnippetFields viewerLibraryEntry { __typename ...viewerLibraryEntryFields } } }  fragment pageInfoFragment on PageInfo { hasPreviousPage hasNextPage startCursor endCursor }"
+        
+        return self.graphql(operationName, variables, query)
+
+
+    def GetAnimeVideosByAnime(self, first, last, availableInViewerRegion, animeId):
+        """
+        Retrieve anime videos based on the specified parameters.
+
+        Args:
+            first (int): The number of videos to retrieve from the beginning of the list.
+            last (int): The number of videos to retrieve from the end of the list.
+            availableInViewerRegion (bool): Whether the videos should be available in the viewer's region.
+            animeId (str): The ID of the anime.
+        """
+
+        operationName = "GetAnimeVideosByAnime"
+        variables = {
+            "first": first,
+            "last": last,
+            "availableInViewerRegion": availableInViewerRegion,
+            "animeId": animeId
+        }
+        query = "query GetAnimeVideosByAnime($beforeCursor: String, $afterCursor: String, $first: Int, $last: Int, $availableInViewerRegion: Boolean, $animeId: ID!) { animeVideos(before: $beforeCursor, after: $afterCursor, first: $first, last: $last, availableInViewerRegion: $availableInViewerRegion, animeId: $animeId) { nodes { __typename ...fullAnimeVideoFragment } pageInfo { __typename ...pageInfoFragment } } }  fragment animeVideoFields on AnimeVideo { databaseId videoDatabaseId animeDatabaseId url embedUrl title duration containsSpoilers spoilerNote position updatedAt createdAt }  fragment videoFields on Video { databaseId title duration aspectRatio thumbnailUrl url embedUrl embeddable availableInViewerRegion liveStartTime liveEndTime uploadedAt updatedAt createdAt }  fragment mediaTrackFields on MediaTrack { languageCode shortLabel category }  fragment languageFields on Language { code name nativeName shortName }  fragment fullMediaTrackFragment on MediaTrack { __typename ...mediaTrackFields language { __typename ...languageFields } }  fragment fullVideoFragment on Video { __typename ...videoFields tracks { __typename ...fullMediaTrackFragment } }  fragment fullAnimeVideoFragment on AnimeVideo { __typename ...animeVideoFields video { __typename ...fullVideoFragment } }  fragment pageInfoFragment on PageInfo { hasPreviousPage hasNextPage startCursor endCursor }"
+        
+        return self.graphql(operationName, variables, query)
